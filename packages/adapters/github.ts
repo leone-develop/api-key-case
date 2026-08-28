@@ -8,7 +8,7 @@ export class GitHubAdapter implements DeployTarget {
 
   async detect(projectDir: string): Promise<DetectResult> {
     const remote = getRemoteUrl(projectDir);
-    if (remote && remote.includes("github.com")) {
+    if (remote && isGitHubRemoteUrl(remote)) {
       return { detected: true, reason: `git remote: ${remote}` };
     }
     return { detected: false, reason: "no github.com git remote found" };
@@ -65,4 +65,21 @@ export class GitHubAdapter implements DeployTarget {
 
     return steps;
   }
+}
+
+export function isGitHubRemoteUrl(remote: string): boolean {
+  try {
+    const hostname = new URL(remote).hostname;
+    if (hostname) {
+      return hostname.toLowerCase() === "github.com";
+    }
+  } catch {
+    // Fall through to Git's SCP-like syntax.
+  }
+
+  // Git also accepts SCP-like remotes such as git@github.com:owner/repo.git.
+  // Match the host as a complete component so github.com.evil.example and
+  // local paths that merely contain github.com are never treated as GitHub.
+  const scpLike = /^(?:[^@/:\\]+@)?([^/:\\]+):[^/\\]/.exec(remote);
+  return scpLike?.[1]?.toLowerCase() === "github.com";
 }

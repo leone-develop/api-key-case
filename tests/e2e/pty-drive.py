@@ -14,14 +14,14 @@ step answers ("yes") are deliberately NOT masked: they are not secrets, and
 masking such common words would corrupt the transcript the caller asserts on.
 
 Usage:
-  pty-drive.py --step 'PATTERN=>env:VARNAME' \
-               --step 'PATTERN=>literal:yes' \
+  pty-drive.py --step 'PROMPT=>env:VARNAME' \
+               --step 'PROMPT=>literal:yes' \
                [--mask-env VARNAME] [--transcript FILE] [--timeout SECONDS] \
                -- command arg...
 
 Exit status:
   the child's exit status, or
-  97  a --step pattern never appeared before the child exited
+  97  a --step prompt never appeared before the child exited
   98  the overall timeout elapsed
 """
 
@@ -29,7 +29,6 @@ import argparse
 import errno
 import os
 import pty
-import re
 import select
 import subprocess
 import sys
@@ -42,10 +41,12 @@ DRAIN_SECONDS = 2.0
 
 
 def parse_step(raw):
-    """'PATTERN=>env:NAME' or 'PATTERN=>literal:TEXT' -> (compiled, text, secret)."""
+    """'PROMPT=>env:NAME' or 'PROMPT=>literal:TEXT' -> (prompt, text, secret)."""
     if "=>" not in raw:
-        raise argparse.ArgumentTypeError(f"--step needs PATTERN=>SOURCE:VALUE, got {raw!r}")
-    pattern, source = raw.split("=>", 1)
+        raise argparse.ArgumentTypeError(f"--step needs PROMPT=>SOURCE:VALUE, got {raw!r}")
+    prompt, source = raw.split("=>", 1)
+    if not prompt:
+        raise argparse.ArgumentTypeError("--step prompt must not be empty")
     if source.startswith("env:"):
         name = source[len("env:"):]
         value = os.environ.get(name)
@@ -57,7 +58,7 @@ def parse_step(raw):
         secret = False
     else:
         raise argparse.ArgumentTypeError(f"--step source must be env: or literal:, got {source!r}")
-    return re.compile(pattern), value, secret
+    return prompt, value, secret
 
 
 def mask(text, secrets):
@@ -158,8 +159,8 @@ def main():
             transcript += text
             pending += text
 
-            if steps and steps[0][0].search(pending):
-                _pattern, value, _secret = steps.pop(0)
+            if steps and steps[0][0] in pending:
+                _prompt, value, _secret = steps.pop(0)
                 os.write(master_fd, (value + "\r").encode("utf-8"))
                 pending = ""
     finally:
@@ -189,7 +190,7 @@ def main():
         sys.stderr.write(f"pty-drive: timed out after {args.timeout}s\n")
         return 98
     if steps:
-        missing = ", ".join(pattern.pattern for pattern, _value, _secret in steps)
+        missing = ", ".join(prompt for prompt, _value, _secret in steps)
         sys.stderr.write(f"pty-drive: child exited before these prompts appeared: {missing}\n")
         return 97
     return exit_code

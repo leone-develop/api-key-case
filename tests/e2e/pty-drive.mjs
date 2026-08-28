@@ -16,8 +16,8 @@
 // swap one for the other by platform.
 //
 // Usage:
-//   node pty-drive.mjs --step 'PATTERN=>env:VARNAME' \
-//                      --step 'PATTERN=>literal:yes' \
+//   node pty-drive.mjs --step 'PROMPT=>env:VARNAME' \
+//                      --step 'PROMPT=>literal:yes' \
 //                      [--mask-env VARNAME] [--transcript FILE] \
 //                      [--raw-transcript FILE] [--timeout SECONDS] \
 //                      -- command arg...
@@ -42,10 +42,13 @@ const BEL = String.fromCharCode(0x07);
 function parseStep(raw) {
   const marker = raw.indexOf("=>");
   if (marker === -1) {
-    throw new Error(`--step needs PATTERN=>SOURCE:VALUE, got ${JSON.stringify(raw)}`);
+    throw new Error(`--step needs PROMPT=>SOURCE:VALUE, got ${JSON.stringify(raw)}`);
   }
-  const pattern = raw.slice(0, marker);
+  const prompt = raw.slice(0, marker);
   const source = raw.slice(marker + 2);
+  if (!prompt) {
+    throw new Error("--step prompt must not be empty");
+  }
 
   if (source.startsWith("env:")) {
     const name = source.slice(4);
@@ -53,13 +56,13 @@ function parseStep(raw) {
     if (!value) {
       throw new Error(`--step referenced env ${name}, which is unset or empty`);
     }
-    return { pattern: new RegExp(pattern), value, secret: true };
+    return { prompt, value, secret: true };
   }
   if (source.startsWith("literal:")) {
     // Literal answers ("yes") are deliberately not masked: they are not
     // secrets, and masking such common words would corrupt the transcript
     // the caller asserts on.
-    return { pattern: new RegExp(pattern), value: source.slice(8), secret: false };
+    return { prompt, value: source.slice(8), secret: false };
   }
   throw new Error(`--step source must be env: or literal:, got ${JSON.stringify(source)}`);
 }
@@ -206,7 +209,7 @@ function finish(code, reason) {
     process.exit(98);
   }
   if (steps.length > 0) {
-    const missing = steps.map((step) => step.pattern.source).join(", ");
+    const missing = steps.map((step) => step.prompt).join(", ");
     process.stderr.write(`pty-drive: child exited before these prompts appeared: ${missing}\n`);
     process.exit(97);
   }
@@ -228,7 +231,7 @@ child.onData((chunk) => {
   pending += chunk;
 
   if (answering || steps.length === 0) return;
-  if (!steps[0].pattern.test(stripAnsi(pending))) return;
+  if (!stripAnsi(pending).includes(steps[0].prompt)) return;
 
   answering = true;
   const { value } = steps.shift();

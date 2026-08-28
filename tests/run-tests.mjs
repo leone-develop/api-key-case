@@ -28,6 +28,7 @@ import { runDeploy } from "../dist/core/deploy/engine.js";
 import { runWithSecret } from "../dist/core/deploy/handoff.js";
 import { resolveCli } from "../dist/core/deploy/which.js";
 import { ADAPTERS } from "../dist/adapters/index.js";
+import { isGitHubRemoteUrl } from "../dist/adapters/github.js";
 import { buildTools } from "../dist/mcp/tools.js";
 import {
   assertProFeature,
@@ -164,6 +165,7 @@ try {
   testRegistry(join(testRoot, "registry"));
   testVaultCliBoundary(join(testRoot, "vault-cli"));
   await testRealKeyringE2E();
+  testGitHubRemoteDetection();
   testDeployPlansNeverCarryAValue();
   testWhichResolvesOnlyFromGivenPath(join(testRoot, "which"));
   await testEngineDryRun(join(testRoot, "engine-dry-run"));
@@ -632,6 +634,28 @@ function testDeployPlansNeverCarryAValue() {
         assertNoCanary(`${adapter.id}/${env} preStep displayCommand`, step.displayCommand);
       }
     }
+  }
+}
+
+function testGitHubRemoteDetection() {
+  for (const remote of [
+    "https://github.com/leone-develop/api-key-case.git",
+    "ssh://git@github.com/leone-develop/api-key-case.git",
+    "git://GITHUB.COM/leone-develop/api-key-case.git",
+    "git@github.com:leone-develop/api-key-case.git",
+    "github.com:leone-develop/api-key-case.git"
+  ]) {
+    assert.equal(isGitHubRemoteUrl(remote), true, `expected GitHub remote: ${remote}`);
+  }
+
+  for (const remote of [
+    "https://github.com.evil.example/owner/repo.git",
+    "https://evil.example/github.com/owner/repo.git",
+    "git@github.com.evil.example:owner/repo.git",
+    "notgithub.com:owner/repo.git",
+    "C:\\tmp\\github.com\\owner\\repo"
+  ]) {
+    assert.equal(isGitHubRemoteUrl(remote), false, `expected non-GitHub remote: ${remote}`);
   }
 }
 
