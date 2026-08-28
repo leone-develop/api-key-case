@@ -3,6 +3,7 @@ name: CodeQL
 # This workflow is intentionally safe to keep in the repository while it is
 # private; GitHub code scanning becomes useful once the repository is public.
 on:
+  workflow_dispatch:
   push:
     branches: [main]
   pull_request:
