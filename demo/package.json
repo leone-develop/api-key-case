@@ -1,0 +1,21 @@
+{
+  "name": "api-key-case-demo",
+  "private": true,
+  "type": "module",
+  "description": "Demo-video generator for API Key Case. Never published to npm (see the root package.json \"files\" allowlist).",
+  "scripts": {
+    "demo": "node run-demo.mjs",
+    "demo:ja": "node run-demo.mjs --locale ja --skip-capture",
+    "demo:all": "node run-demo.mjs && node run-demo.mjs --locale ja --skip-capture",
+    "setup": "node setup-demo.mjs",
+    "capture": "node capture.mjs",
+    "render": "node render-frames.mjs",
+    "render:ja": "node render-frames.mjs --locale ja",
+    "video": "node build-video.mjs",
+    "video:ja": "node build-video.mjs --locale ja",
+    "cleanup": "node cleanup-demo.mjs"
+  },
+  "dependencies": {
+    "@homebridge/node-pty-prebuilt-multiarch": "^0.13.0"
+  }
+}

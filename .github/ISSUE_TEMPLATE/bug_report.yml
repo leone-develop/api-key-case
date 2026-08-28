@@ -1,0 +1,64 @@
+name: Bug report
+description: Report a reproducible API Key Case problem using fake values only.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Do not paste a real API key, `.env`, purchase key, AKC1 license, order number, email address, or unredacted output.**
+        If a credential may have leaked, rotate it at the provider first. Security vulnerabilities belong in Private Vulnerability Reporting, not this form.
+  - type: input
+    id: version
+    attributes:
+      label: API Key Case version
+      placeholder: "0.9.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - Windows
+        - macOS
+        - Linux
+        - Other / not sure
+    validations:
+      required: true
+  - type: input
+    id: node
+    attributes:
+      label: Node.js version
+      placeholder: "20.x, 22.x, or 24.x"
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction with fake values
+      description: Include the command shape and minimal setup. Replace all identifiers and values with fake canaries.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Redacted actual behavior
+      description: Remove local usernames, project names, account IDs, secrets, purchase data, and unnecessary paths.
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety check
+      options:
+        - label: I used only fake values and removed credentials, purchase data, and personal information.
+          required: true
+        - label: This is not a privately reportable security vulnerability.
+          required: true

@@ -1,0 +1,42 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "api-key-case-license-exchange-test",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-07-13",
+  "compatibility_flags": ["nodejs_compat"],
+  // The workers.dev route is required: manual test-mode verification hits this
+  // Worker directly (the CLI may only ever compile the live URL). Per-version
+  // preview URLs are not required for that, so they stay off — this Worker
+  // signs with the same key as live, so every extra public entry point to it
+  // is an extra way to mint a real AKC1.
+  "workers_dev": true,
+  "preview_urls": false,
+  "vars": {
+    "LEMON_TEST_MODE": "true"
+  },
+  "secrets": {
+    "required": [
+      "LEMON_STORE_ID",
+      "LEMON_PRODUCT_ID",
+      "LEMON_VARIANT_ID",
+      "LEMON_API_KEY",
+      "AKC_ED25519_PRIVATE_KEY"
+    ]
+  },
+  "ratelimits": [
+    {
+      "name": "PURCHASE_KEY_RATE_LIMITER",
+      "namespace_id": "2001",
+      "simple": { "limit": 5, "period": 60 }
+    },
+    {
+      "name": "IP_RATE_LIMITER",
+      "namespace_id": "2002",
+      "simple": { "limit": 30, "period": 60 }
+    }
+  ],
+  "observability": {
+    "enabled": true,
+    "logs": { "head_sampling_rate": 1 }
+  }
+}

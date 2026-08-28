@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0d1714">
+  <meta name="description" content="API Key Case Pro の特定商取引法に基づく表記。">
+  <link rel="canonical" href="https://apikeycase.leoneapps.com/tokushoho">
+  <title>特定商取引法に基づく表記 — API Key Case</title>
+
+  <style>
+    :root {
+      --ink: #0d1714;
+      --ink-soft: #40504b;
+      --paper: #f5f4ed;
+      --paper-deep: #e8e6dc;
+      --panel: #fffefa;
+      --lime: #d9ff67;
+      --coral: #ff7259;
+      --line: rgba(13, 23, 20, 0.16);
+      --sans: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans JP", sans-serif;
+      --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 88% 2%, rgba(117, 231, 196, 0.22), transparent 22rem),
+        var(--paper);
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.85;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: #157a53; }
+    a:hover { color: var(--ink); }
+    a:focus-visible, summary:focus-visible { outline: 3px solid var(--coral); outline-offset: 3px; }
+
+    .wrap { width: min(760px, calc(100% - 40px)); margin-inline: auto; }
+
+    .doc-header {
+      padding: 18px 0;
+      border-bottom: 1px solid rgba(13, 23, 20, 0.08);
+      background: rgba(245, 244, 237, 0.9);
+    }
+    .doc-header .wrap { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--ink);
+      font-weight: 850;
+      letter-spacing: -0.03em;
+      text-decoration: none;
+    }
+    .brand-mark {
+      display: grid;
+      width: 34px;
+      height: 34px;
+      place-items: center;
+      border: 1.5px solid var(--ink);
+      border-radius: 10px;
+      background: var(--lime);
+      box-shadow: 3px 3px 0 var(--ink);
+    }
+    .brand-mark svg { display: block; width: 21px; height: 21px; }
+    .back { font-size: 13px; font-weight: 700; text-decoration: none; white-space: nowrap; }
+
+    main { padding: 56px 0 24px; }
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(30px, 5vw, 42px);
+      font-weight: 900;
+      letter-spacing: -0.05em;
+      line-height: 1.16;
+    }
+    .updated {
+      margin: 0 0 36px;
+      color: var(--ink-soft);
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: 0.04em;
+    }
+    h2 {
+      margin: 46px 0 14px;
+      font-size: 20px;
+      font-weight: 850;
+      letter-spacing: -0.025em;
+    }
+    p, li { color: var(--ink-soft); font-size: 15px; }
+    p { margin: 0 0 16px; }
+    ul, ol { margin: 0 0 16px; padding-left: 1.3em; }
+    li { margin-bottom: 8px; }
+    strong { color: var(--ink); }
+    code {
+      padding: 1px 5px;
+      border-radius: 5px;
+      background: var(--paper-deep);
+      font-family: var(--mono);
+      font-size: 0.87em;
+    }
+
+    .notice {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 14px;
+      margin-bottom: 40px;
+      padding: 20px 22px;
+      border: 1px solid rgba(168, 76, 57, 0.28);
+      border-radius: 16px;
+      background: #fff4ee;
+    }
+    .notice svg { width: 22px; height: 22px; color: var(--coral); }
+    .notice h2 { margin: 0 0 6px; font-size: 15px; }
+    .notice p { margin: 0 0 8px; color: #765247; font-size: 13.5px; }
+    .notice p:last-child { margin-bottom: 0; }
+
+    .table { margin: 0 0 20px; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; background: var(--panel); }
+    .row {
+      display: grid;
+      grid-template-columns: minmax(150px, 0.62fr) 1.38fr;
+      border-bottom: 1px solid var(--line);
+    }
+    .row:last-child { border-bottom: 0; }
+    .row > dt {
+      padding: 16px 18px;
+      background: rgba(232, 230, 220, 0.5);
+      font-size: 14px;
+      font-weight: 800;
+    }
+    .row > dd { margin: 0; padding: 16px 18px; color: var(--ink-soft); font-size: 14.5px; }
+    .row > dd p { margin: 0 0 10px; font-size: 14.5px; }
+    .row > dd p:last-child { margin-bottom: 0; }
+    .fill {
+      display: inline-block;
+      padding: 1px 8px;
+      border: 1px dashed var(--coral);
+      border-radius: 6px;
+      color: #a8402a;
+      background: #fff4ee;
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .doc-footer {
+      margin-top: 64px;
+      padding: 28px 0 40px;
+      border-top: 1px solid var(--line);
+    }
+    .doc-footer .links { display: flex; flex-wrap: wrap; gap: 12px 24px; margin-bottom: 16px; }
+    .doc-footer a { font-size: 13px; font-weight: 700; text-decoration: none; }
+    .doc-footer p { margin: 0; color: #66736e; font-size: 11.5px; }
+
+    @media (max-width: 620px) {
+      .wrap { width: calc(100% - 26px); }
+      main { padding-top: 40px; }
+      .row { grid-template-columns: 1fr; }
+      .row > dt { padding-bottom: 6px; background: transparent; }
+      .row > dd { padding-top: 0; }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="doc-header">
+    <div class="wrap">
+      <a class="brand" href="index.html">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M4.5 7.8A3.3 3.3 0 0 1 7.8 4.5h8.4a3.3 3.3 0 0 1 3.3 3.3v8.4a3.3 3.3 0 0 1-3.3 3.3H7.8a3.3 3.3 0 0 1-3.3-3.3V7.8Z" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M9.1 11.5a2.9 2.9 0 1 1 4.6 2.35l2.2 2.15M15.9 16l1.2-1.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span>API Key Case</span>
+      </a>
+      <a class="back" href="index.html">← トップへ戻る</a>
+    </div>
+  </header>
+
+  <main>
+    <div class="wrap">
+      <h1>特定商取引法に基づく表記</h1>
+      <p class="updated">最終更新：2026-08-19</p>
+
+      <div class="notice" role="note">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 8v5m0 3.5v.1M4.7 20h14.6a1.5 1.5 0 0 0 1.3-2.25L13.3 5.1a1.5 1.5 0 0 0-2.6 0L3.4 17.75A1.5 1.5 0 0 0 4.7 20Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <div>
+          <h2>販売条件の確認について</h2>
+          <p>決済前に、Lemon Squeezy の最終確認画面で商品、価格、税、支払方法および返金条件をご確認いただけます。</p>
+          <p>販売事業者の正式氏名、運営責任者、所在地および電話番号は、下記窓口から請求があった場合、購入判断に間に合うよう遅滞なく電子的に開示します。</p>
+        </div>
+      </div>
+
+      <dl class="table">
+        <div class="row">
+          <dt>商品提供者</dt>
+          <dd>Leone Apps（正式氏名は、請求があれば遅滞なく開示します）</dd>
+        </div>
+        <div class="row">
+          <dt>運営責任者</dt>
+          <dd>請求があれば遅滞なく開示します</dd>
+        </div>
+        <div class="row">
+          <dt>所在地</dt>
+          <dd>請求があれば遅滞なく開示します</dd>
+        </div>
+        <div class="row">
+          <dt>電話番号</dt>
+          <dd>請求があれば遅滞なく開示します</dd>
+        </div>
+        <div class="row">
+          <dt>お問い合わせ・開示請求</dt>
+          <dd>
+            <p>事業者情報の開示請求、購入前の確認、購入・返金・個人情報に関する連絡は、<a href="mailto:dev@leoneapps.com">dev@leoneapps.com</a> へ送ってください。件名に「特商法に基づく表示の開示請求」と記載してください。購入判断に間に合うよう、電子的に遅滞なく回答します。</p>
+            <p>一般的な非機密の製品相談だけは <a href="https://github.com/leone-develop/api-key-case/issues">GitHub Issues</a> でも受け付けます。Issue は公開されます。本物のAPIキー、購入キー、注文番号、メールアドレス、住所その他の個人情報・秘密情報を記載しないでください。購入・決済・返金に関する個別情報は Issue に投稿しないでください。</p>
+          </dd>
+        </div>
+        <div class="row">
+          <dt>ウェブサイト</dt>
+          <dd><a href="https://apikeycase.leoneapps.com/">https://apikeycase.leoneapps.com/</a></dd>
+        </div>
+        <div class="row">
+          <dt>記録上の販売者</dt>
+          <dd>
+            <p>Lemon Squeezy（Sold through Link, LLC）</p>
+            <p>222 South Main Street, Suite 500, Salt Lake City, Utah 84101, USA</p>
+            <p>Lemon Squeezy は Merchant of Record として、販売、決済、税の計算・徴収、領収書、チャージバックおよび返金処理を担当します。API Key Case の利用許諾と製品サポートは Leone Apps が担当します。</p>
+          </dd>
+        </div>
+        <div class="row">
+          <dt>販売価格</dt>
+          <dd>
+            <p>API Key Case Pro（deployライセンス）：<strong>2,980円</strong>（買い切り・一回払い）</p>
+            <p>購入地域に応じた表示通貨、適用税および最終的な支払総額は Lemon Squeezy の決済画面に表示されます。Free 機能の利用に料金はかかりません。</p>
+          </dd>
+        </div>
+        <div class="row">
+          <dt>商品代金以外の必要料金</dt>
+          <dd>インターネット接続料金、通信料金、外部サービスの利用料金、為替換算手数料その他、利用者の環境により発生する費用は利用者の負担です。適用される税は決済画面に表示されます。</dd>
+        </div>
+        <div class="row">
+          <dt>支払方法</dt>
+          <dd>Lemon Squeezy の決済画面に表示される方法（クレジットカード等）</dd>
+        </div>
+        <div class="row">
+          <dt>支払時期</dt>
+          <dd>購入手続きの完了時に一回のみ決済されます。定期課金、自動更新および更新料金はありません。</dd>
+        </div>
+        <div class="row">
+          <dt>商品の引渡時期</dt>
+          <dd>決済完了後、通常ただちに Lemon Squeezy から購入者固有の購入キーが注文完了メールおよび注文ページに提供されます。人手による納品作業はありません。ソフトウェア本体は npm から取得でき、購入キーは <code>api-key-case license activate</code> で Pro 機能を有効化するために使用します。</dd>
+        </div>
+        <div class="row">
+          <dt>返品・キャンセル</dt>
+          <dd>
+            <p>デジタル商品のため、物品としての返品または交換はありません。通信販売には法定のクーリング・オフ制度は適用されません。</p>
+            <p><strong>独自の返金保証として、購入から14日以内は原則として理由を問わず返金を申請できます。</strong> 不正または制度の濫用が認められる場合を除きます。申請は Lemon Squeezy の注文メールまたは注文ページから行ってください。</p>
+            <p>返金または注文の無効化後、新しいライセンス交換はできません。発行済みオフラインライセンスは遠隔失効できないため、返金後は Pro の利用を停止し、<code>api-key-case license deactivate</code> を実行してください。</p>
+            <p>詳細は<a href="refund.html">返金ポリシー</a>をご確認ください。法令上認められる権利を制限するものではありません。</p>
+          </dd>
+        </div>
+        <div class="row">
+          <dt>動作環境</dt>
+          <dd>
+            <p>Node.js 20 以上／Windows・macOS・Linux</p>
+            <p><code>deploy</code> には、配置先に応じた公式CLI（Cloudflare Wrangler／Vercel CLI／GitHub CLI）と、当該サービスへの有効なログインが必要です。ライセンス有効化および配置時にはインターネット接続が必要です。</p>
+            <p>現行版はプレリリース版です。購入前に Free 機能と対象環境での動作をご確認ください。</p>
+          </dd>
+        </div>
+        <div class="row">
+          <dt>ライセンス条件</dt>
+          <dd>1購入につき1名が利用できます。本人が管理する複数端末・複数プロジェクトで利用できます。組織内で複数人が利用する場合は人数分の購入が必要です。購入には Pro v1（1.x系）のアップデートが含まれます。将来の2.x以降は別ライセンスとなる場合があります。</dd>
+        </div>
+        <div class="row">
+          <dt>特別な販売条件</dt>
+          <dd>Lemon Squeezy が取引を提供する国・地域および決済手段に限ります。提供数量の上限、無料トライアルまたは継続課金はありません。法令、制裁、決済審査、不正防止その他の理由により購入できない場合があります。</dd>
+        </div>
+        <div class="row">
+          <dt>サポート</dt>
+          <dd>一般的な非機密の製品サポートは GitHub Issues でお受けします。購入、返金、個人情報または非公開の技術情報は <a href="mailto:dev@leoneapps.com">dev@leoneapps.com</a> へ送ってください。個人開発のため、受付時間、返信期限または解決を保証しません。<strong>Issue には本物のAPIキー、購入キー、注文情報またはアクセストークンを貼らないでください。</strong></dd>
+        </div>
+      </dl>
+    </div>
+  </main>
+
+  <footer class="doc-footer">
+    <div class="wrap">
+      <div class="links">
+        <a href="index.html">トップ</a>
+        <a href="terms.html">利用規約</a>
+        <a href="privacy.html">プライバシーポリシー</a>
+        <a href="refund.html">返金ポリシー</a>
+      </div>
+      <p>© 2026 Leone Apps. API Key Case.</p>
+    </div>
+  </footer>
+</body>
+</html>

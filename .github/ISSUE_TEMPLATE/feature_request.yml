@@ -1,0 +1,37 @@
+name: Feature request
+description: Propose an improvement without weakening the secret-value boundary.
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        API Key Case never returns secret values, accepts arbitrary deploy URLs, or bypasses human production confirmation. Requests that require one of those paths are out of scope.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve
+      description: Describe the user problem without including any real secret, account, or purchase information.
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired outcome
+      description: Explain what becomes easier or safer for the user.
+    validations:
+      required: true
+  - type: textarea
+    id: boundary
+    attributes:
+      label: Security-boundary impact
+      description: State whether this changes secret storage, deploy targets, CLI input, MCP schemas, logging, or production confirmation.
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety check
+      options:
+        - label: This request does not require API Key Case to reveal, export, log, or send a secret to an arbitrary destination.
+          required: true

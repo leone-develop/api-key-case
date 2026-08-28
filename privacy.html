@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0d1714">
+  <meta name="description" content="API Key Case のプライバシーポリシー。テレメトリはなく、スキャンはローカルで完結します。">
+  <link rel="canonical" href="https://apikeycase.leoneapps.com/privacy">
+  <title>プライバシーポリシー — API Key Case</title>
+
+  <style>
+    :root {
+      --ink: #0d1714;
+      --ink-soft: #40504b;
+      --paper: #f5f4ed;
+      --paper-deep: #e8e6dc;
+      --panel: #fffefa;
+      --lime: #d9ff67;
+      --coral: #ff7259;
+      --line: rgba(13, 23, 20, 0.16);
+      --sans: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans JP", sans-serif;
+      --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 88% 2%, rgba(117, 231, 196, 0.22), transparent 22rem),
+        var(--paper);
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.85;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: #157a53; }
+    a:hover { color: var(--ink); }
+    a:focus-visible { outline: 3px solid var(--coral); outline-offset: 3px; }
+
+    .wrap { width: min(760px, calc(100% - 40px)); margin-inline: auto; }
+
+    .doc-header {
+      padding: 18px 0;
+      border-bottom: 1px solid rgba(13, 23, 20, 0.08);
+      background: rgba(245, 244, 237, 0.9);
+    }
+    .doc-header .wrap { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--ink);
+      font-weight: 850;
+      letter-spacing: -0.03em;
+      text-decoration: none;
+    }
+    .brand-mark {
+      display: grid;
+      width: 34px;
+      height: 34px;
+      place-items: center;
+      border: 1.5px solid var(--ink);
+      border-radius: 10px;
+      background: var(--lime);
+      box-shadow: 3px 3px 0 var(--ink);
+    }
+    .brand-mark svg { display: block; width: 21px; height: 21px; }
+    .back { font-size: 13px; font-weight: 700; text-decoration: none; white-space: nowrap; }
+
+    main { padding: 56px 0 24px; }
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(30px, 5vw, 42px);
+      font-weight: 900;
+      letter-spacing: -0.05em;
+      line-height: 1.16;
+    }
+    .updated {
+      margin: 0 0 34px;
+      color: var(--ink-soft);
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: 0.04em;
+    }
+    .lead {
+      margin-bottom: 40px;
+      padding: 20px 22px;
+      border: 1.5px solid var(--ink);
+      border-radius: 16px;
+      background: var(--panel);
+      box-shadow: 5px 5px 0 var(--paper-deep);
+    }
+    .lead p:last-child { margin-bottom: 0; }
+    h2 {
+      margin: 46px 0 14px;
+      font-size: 20px;
+      font-weight: 850;
+      letter-spacing: -0.025em;
+    }
+    p, li { color: var(--ink-soft); font-size: 15px; }
+    p { margin: 0 0 16px; }
+    ul, ol { margin: 0 0 16px; padding-left: 1.35em; }
+    li { margin-bottom: 9px; }
+    strong { color: var(--ink); }
+    code {
+      padding: 1px 5px;
+      border-radius: 5px;
+      background: var(--paper-deep);
+      font-family: var(--mono);
+      font-size: 0.87em;
+    }
+
+    .doc-footer {
+      margin-top: 64px;
+      padding: 28px 0 40px;
+      border-top: 1px solid var(--line);
+    }
+    .doc-footer .links { display: flex; flex-wrap: wrap; gap: 12px 24px; margin-bottom: 16px; }
+    .doc-footer a { font-size: 13px; font-weight: 700; text-decoration: none; }
+    .doc-footer p { margin: 0; color: #66736e; font-size: 11.5px; }
+
+    @media (max-width: 620px) {
+      .wrap { width: calc(100% - 26px); }
+      main { padding-top: 40px; }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="doc-header">
+    <div class="wrap">
+      <a class="brand" href="index.html">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M4.5 7.8A3.3 3.3 0 0 1 7.8 4.5h8.4a3.3 3.3 0 0 1 3.3 3.3v8.4a3.3 3.3 0 0 1-3.3 3.3H7.8a3.3 3.3 0 0 1-3.3-3.3V7.8Z" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M9.1 11.5a2.9 2.9 0 1 1 4.6 2.35l2.2 2.15M15.9 16l1.2-1.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span>API Key Case</span>
+      </a>
+      <a class="back" href="index.html">← トップへ戻る</a>
+    </div>
+  </header>
+
+  <main>
+    <div class="wrap">
+      <h1>プライバシーポリシー</h1>
+      <p class="updated">最終更新：2026-08-19</p>
+
+      <div class="lead">
+        <p><strong>API Key Case のスキャン、保存状態の確認および通常の Pro 判定はローカルで完結します。</strong> 開発者独自のテレメトリ、アクセス解析、広告タグまたはクラッシュレポート送信機能はありません。</p>
+        <p>一方、ライセンス有効化、公式CLIによる配置、決済、ウェブサイト閲覧およびサポートでは外部サービスが関与します。本ポリシーは、その境界を実装に即して説明します。</p>
+      </div>
+
+      <h2>1. 適用範囲</h2>
+      <p>本ポリシーは、Leone Apps（以下「開発者」）が公式に提供する API Key Case、ライセンス交換サービス、本ウェブサイトおよび開発者が行うサポートに適用されます。Cloudflare、Vercel、GitHub、Lemon Squeezy、npm、OS提供者およびAIサービスなど第三者のサービスには、各事業者のプライバシーポリシーが適用されます。</p>
+
+      <h2>2. CLI が外部送信しない情報</h2>
+      <p>本ソフトウェアは、次の情報を開発者へ送信しません。</p>
+      <ul>
+        <li><strong>APIキー、アクセストークン、パスワード、秘密鍵その他の秘密値</strong></li>
+        <li>スキャン結果、検出された環境変数名、ファイルパス、ソースコードおよび Git 履歴</li>
+        <li>コマンドの実行履歴、利用頻度、ローカルエラーまたは端末識別子</li>
+      </ul>
+      <p>秘密値は、利用者の操作により OS のシークレットストア（macOS Keychain / Windows 資格情報マネージャー / Linux Secret Service）へ保存されます。開発者はこれを取得できません。OS提供者による取扱いは各OSの条件に従います。</p>
+
+      <h2>3. ライセンス有効化時に処理する情報</h2>
+      <p><code>api-key-case license activate</code> を利用した場合に限り、本ソフトウェアは次の情報を HTTPS で固定送信先 <code>apikeycase-license.leoneapps.com</code>（Cloudflare Workers）へ送ります。</p>
+      <ul>
+        <li><strong>Lemon Squeezy の購入キー：</strong>購入の有効性を確認するため Lemon Squeezy の License API へ送信します。開発者のデータベース、アプリケーションログまたは応答には保存・出力しません。</li>
+        <li><strong>接続元 IP アドレス：</strong>不正な大量アクセスを抑止するレート制限に使用します。アプリケーションログへ出力せず、Cloudflare のレート制限基盤および標準的なセキュリティ処理の範囲で取り扱われます。</li>
+        <li><strong>購入キーの SHA-256 ダイジェスト：</strong>同一キーによる大量交換を抑止するレート制限に使用します。購入キーを復元する目的では使用せず、アプリケーションログまたは応答へ出力しません。</li>
+      </ul>
+      <p>交換サービスは永続データベースを持ちません。処理結果として返す署名済みライセンスには、ライセンス識別子、プラン、発行日時および形式バージョンが含まれますが、氏名、メールアドレス、購入キーまたは秘密値は含まれません。ライセンスは利用者の端末へ保存され、<code>license deactivate</code> で削除できます。</p>
+      <p>有効化後の Pro 判定はオフラインです。定期的な再認証、端末固定、利用状況送信または有効期限照会はありません。</p>
+
+      <h2>4. 配置時の外部通信</h2>
+      <p><code>deploy</code> は、利用者が指定した Cloudflare Wrangler、Vercel CLI または GitHub CLI をローカルで起動し、保存済みの秘密値を標準入力へ渡します。この通信は利用者が明示的に選択した配置処理であり、各CLIと各プラットフォームの規約およびプライバシーポリシーに従います。</p>
+      <p>開発者のサーバーは配置経路に入りません。開発者は、配置される秘密値、配置先アカウント、プロジェクト名または配置結果を受け取りません。</p>
+
+      <h2>5. 決済・注文情報</h2>
+      <p>決済は Merchant of Record である <strong>Lemon Squeezy</strong> が取り扱います。氏名、メールアドレス、請求先、カード情報、注文番号、税情報その他の決済情報は Lemon Squeezy が収集します。開発者はカード番号を受け取りません。</p>
+      <p>開発者は、商品の提供、ライセンス確認、購入者サポート、不正防止および返金対応に必要な範囲で、Lemon Squeezy の管理画面または API を通じて、購入者のメールアドレス、ライセンス状態、注文状態、購入商品、支払・返金状態および関連識別子を参照する場合があります。</p>
+
+      <h2>6. ウェブサイトのアクセス情報</h2>
+      <p>本ウェブサイト（<code>apikeycase.leoneapps.com</code>）は Cloudflare 上で配信されます。開発者独自のアクセス解析、広告、行動追跡またはマーケティング Cookie は設置していません。</p>
+      <p>Cloudflare は、配信、安全確保、不正対策および障害調査のため、IP アドレス、日時、リクエスト先、User-Agent その他の標準的なアクセス情報を処理する場合があります。保持期間と取扱いは Cloudflare の契約およびポリシーに従います。</p>
+
+      <h2>7. サポート・脆弱性報告</h2>
+      <p>一般サポートは公開の GitHub Issues を利用します。投稿内容、GitHub アカウント名、投稿日時その他 GitHub が表示する情報は公開され、GitHub のポリシーに従って保持されます。購入、返金、個人情報または非公開の技術情報を含む問い合わせは <a href="mailto:dev@leoneapps.com">dev@leoneapps.com</a> へ送ってください。脆弱性報告には GitHub Private Vulnerability Reporting を利用し、利用できない場合は同メールアドレスへ送ってください。</p>
+      <p><strong>Issue や報告には、本物のAPIキー、<code>.env</code>、購入キー、署名済みライセンス、秘密鍵、個人情報または未加工のスキャン結果を記載しないでください。</strong> 開発者は、受領した問い合わせ情報を、回答、調査、不正防止および紛争対応に必要な範囲で利用します。</p>
+
+      <h2>8. 利用目的</h2>
+      <p>開発者が情報を取り扱う目的は、次のとおりです。</p>
+      <ul>
+        <li>本サービスの提供、本人の購入確認、Pro ライセンスの発行および返金</li>
+        <li>問い合わせ、障害、脆弱性、規約違反、不正利用または紛争への対応</li>
+        <li>レート制限、セキュリティ確保、法令遵守および権利保護</li>
+        <li>個人を識別しない形での品質改善および障害傾向の把握</li>
+      </ul>
+      <p>取得時に示した目的と合理的な関連性を超えて利用する場合は、法令に基づき必要な対応を行います。</p>
+
+      <h2>9. 委託・第三者提供・国外での取扱い</h2>
+      <p>開発者は、サービス提供に必要な範囲で Cloudflare、Lemon Squeezy および GitHub を利用します。これらの事業者は日本国外を含む地域で情報を処理する場合があります。各事業者は、自らの規約・ポリシーに基づく独立した取扱い、または開発者の委託先としての取扱いを行います。</p>
+      <p>開発者は、本人の同意がある場合、上記のサービス提供に必要な場合、事業承継がある場合、または法令に基づく場合を除き、個人情報を第三者へ販売または提供しません。</p>
+
+      <h2>10. 保持期間</h2>
+      <ul>
+        <li>購入キー：交換リクエストの処理中のみ使用し、開発者の永続ストレージへ保存しません。</li>
+        <li>レート制限情報：Cloudflare のレート制限およびセキュリティ機能に必要な期間取り扱われます。</li>
+        <li>注文・購入者情報：Lemon Squeezy の保持方針、および会計、返金、法令遵守、紛争対応に必要な期間に従います。</li>
+        <li>GitHub 上の投稿：利用者または GitHub が削除するまで公開される場合があります。</li>
+        <li>署名済みライセンス：利用者の端末上で、利用者が削除するまで保持されます。</li>
+      </ul>
+
+      <h2>11. 安全管理</h2>
+      <p>開発者は、送信先の固定、HTTPS、購入キーの非ログ化、レート制限、応答サイズ制限、秘密鍵のサーバー側保管、権限の限定その他、取扱う情報の性質に応じた合理的な安全管理措置を講じます。ただし、インターネット通信または情報保存の完全な安全性を保証するものではありません。</p>
+
+      <h2>12. 開示・訂正・削除等の請求</h2>
+      <p>開発者が保有する利用者の個人情報について、適用法令に基づく開示、訂正、利用停止または削除を希望する場合は、<a href="mailto:dev@leoneapps.com">dev@leoneapps.com</a> へ請求してください。本人確認に必要な情報をお願いする場合があります。Lemon Squeezy または GitHub が独立して保有する情報は、各事業者へ直接請求してください。</p>
+
+      <h2>13. 本ポリシーの改定</h2>
+      <p>開発者は、サービス内容または法令の変更に応じて本ポリシーを改定します。重要な変更は、効力発生日と変更内容を本ページその他の適切な方法で事前に周知するよう努めます。</p>
+
+      <h2>14. お問い合わせ</h2>
+      <p>本ポリシーに関するお問い合わせは、<a href="mailto:dev@leoneapps.com">dev@leoneapps.com</a> へお願いします。</p>
+    </div>
+  </main>
+
+  <footer class="doc-footer">
+    <div class="wrap">
+      <div class="links">
+        <a href="index.html">トップ</a>
+        <a href="tokushoho.html">特定商取引法に基づく表記</a>
+        <a href="terms.html">利用規約</a>
+        <a href="refund.html">返金ポリシー</a>
+      </div>
+      <p>© 2026 Leone Apps. API Key Case.</p>
+    </div>
+  </footer>
+</body>
+</html>

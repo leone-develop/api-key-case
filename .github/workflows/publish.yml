@@ -1,0 +1,111 @@
+name: Publish
+
+# A real publish is tag-only. workflow_dispatch is deliberately validation-only
+# so a maintainer cannot accidentally turn a branch run into a release.
+# See docs/RELEASING.md for the one-time npm bootstrap and Trusted Publishing
+# setup. npmjs.com must be configured for the workflow filename `publish.yml`.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    environment: npm
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Block publish while release URLs are placeholders
+        run: |
+          if grep -q "TODO-api-key-case-purchase-url" packages/core/license.ts; then
+            echo "::error::PURCHASE_URL is still a placeholder. Configure the live Lemon Squeezy checkout URL before publishing."
+            exit 1
+          fi
+          if grep -q "TODO-api-key-case-license-exchange" packages/core/license-exchange.ts; then
+            echo "::error::LICENSE_EXCHANGE_URL is still a placeholder. Configure the deployed live Worker URL before publishing."
+            exit 1
+          fi
+
+      - name: Check tag matches package.json version
+        if: github.ref_type == 'tag'
+        run: |
+          PKG_VERSION="v$(node -p "require('./package.json').version")"
+          if [ "$GITHUB_REF_NAME" != "$PKG_VERSION" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match package.json version $PKG_VERSION."
+            exit 1
+          fi
+
+      - name: Check tag is on origin/main
+        if: github.ref_type == 'tag'
+        run: |
+          git fetch --no-tags origin main:refs/remotes/origin/main
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" refs/remotes/origin/main; then
+            echo "::error::Release tags must point to a commit reachable from origin/main."
+            exit 1
+          fi
+
+      - name: Require a public repository for a real publish
+        if: github.ref_type == 'tag'
+        run: |
+          if [ "${{ github.event.repository.private }}" = "true" ]; then
+            echo "::error::The repository must be Public before a tagged npm publish so provenance can be attested."
+            exit 1
+          fi
+
+      # setup-node v7 removes the dummy NODE_AUTH_TOKEN fallback and is needed
+      # for npm Trusted Publishing. The action is pinned to an immutable SHA.
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+
+      - name: Ensure npm supports OIDC trusted publishing
+        run: |
+          NEED=11.5.1
+          HAVE="$(npm --version)"
+          if [ "$(printf '%s\n%s\n' "$NEED" "$HAVE" | sort -V | head -n1)" != "$NEED" ]; then
+            echo "::error::Node 24 must provide npm $NEED or newer; found npm $HAVE. Update the pinned Node toolchain instead of installing unreviewed code during release."
+            exit 1
+          fi
+          echo "npm $(npm --version)"
+
+      - run: npm ci
+      - run: npm test
+
+      - name: Dry-run publish
+        run: npm publish --dry-run
+        env:
+          NPM_CONFIG_PROVENANCE: false
+
+      # npm's first publication of an unscoped package needs a one-time
+      # bootstrap token because the npm package settings cannot register a
+      # trusted publisher until the package exists. If npm cannot offer a
+      # package-scoped choice before first publication, use the shortest-lived
+      # granular token with Read and write access to All Packages and the
+      # temporary Bypass 2FA setting. Store it only in the protected `npm`
+      # environment, remove/revoke it immediately after this one tagged run,
+      # and configure Trusted Publishing. With no NPM_TOKEN this branch uses
+      # npm's GitHub OIDC exchange.
+      - name: Publish to npm (bootstrap token or Trusted Publishing)
+        if: github.ref_type == 'tag'
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: true
+        run: |
+          if [ -n "${NPM_TOKEN:-}" ]; then
+            NODE_AUTH_TOKEN="$NPM_TOKEN" env -u NPM_TOKEN npm publish
+          else
+            env -u NPM_TOKEN -u NODE_AUTH_TOKEN npm publish
+          fi

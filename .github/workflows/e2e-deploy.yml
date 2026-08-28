@@ -1,0 +1,240 @@
+name: deploy e2e (real services)
+
+# Manual only. Every run creates and then deletes real resources on
+# Cloudflare, Vercel and GitHub, so this must never fire on push.
+on:
+  workflow_dispatch:
+    inputs:
+      platforms:
+        description: Which targets to verify
+        type: choice
+        default: all
+        options: [all, cloudflare, vercel, github]
+      os:
+        # Defaults to ubuntu, not all: dispatching from the UI without
+        # thinking should not spend the most expensive option. ubuntu is the
+        # cheapest runner and still exercises the whole flow against the real
+        # services, which is what catches a vendor CLI changing under us.
+        # Pick `all` deliberately — before a release, or when the vault or the
+        # terminal handling changes, since those are what differ per OS.
+        description: Which OS to verify on (all = 3x the runners, macOS bills 10x)
+        type: choice
+        default: ubuntu
+        options: [ubuntu, macos, windows, all]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e-deploy
+  cancel-in-progress: false
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Turn the two inputs into one matrix, so a single-platform rerun after a
+  # failure does not pay for a full fleet of runners.
+  # ---------------------------------------------------------------------------
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.pick.outputs.matrix }}
+    steps:
+      - id: pick
+        env:
+          PLATFORMS: ${{ inputs.platforms }}
+          OS: ${{ inputs.os }}
+        run: |
+          if [ "$PLATFORMS" = "all" ]; then
+            platforms='["cloudflare","vercel","github"]'
+          else
+            platforms="[\"$PLATFORMS\"]"
+          fi
+          case "$OS" in
+            all)     runners='["macos-latest","ubuntu-latest","windows-latest"]' ;;
+            macos)   runners='["macos-latest"]' ;;
+            ubuntu)  runners='["ubuntu-latest"]' ;;
+            windows) runners='["windows-latest"]' ;;
+          esac
+          matrix="{\"platform\":$platforms,\"os\":$runners}"
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+          echo "$matrix"
+
+  # ---------------------------------------------------------------------------
+  # The real thing, against the real OS secret store on each runner.
+  #
+  # Per platform: provision a throwaway resource -> save a canary into the OS
+  # store through a pty -> api-key-case deploy -> read the secret list back
+  # from the service -> assert the value leaked nowhere -> delete everything.
+  #
+  # macOS and Windows need no vault setup (the login Keychain and Credential
+  # Manager are usable as is). Linux is the only platform with no secret store
+  # on a bare runner, so one has to be installed, started AND unlocked first —
+  # see the D-Bus steps below.
+  #
+  # Every leg runs the same tests/e2e/deploy-e2e.sh; Windows runs it under Git
+  # Bash, which ships with the runner image.
+  # ---------------------------------------------------------------------------
+  e2e:
+    needs: plan
+    name: ${{ matrix.platform }} (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    defaults:
+      run:
+        # Windows would otherwise default to PowerShell; the e2e script and
+        # every step below are POSIX shell.
+        shell: bash
+    env:
+      GH_OWNER: leone-develop
+      # The OS goes into the throwaway resource names, so the legs for one
+      # platform cannot collide on a name and can all run at once.
+      AKC_E2E_RUN_ID: ${{ github.run_id }}-${{ startsWith(matrix.os, 'macos') && 'mac' || (startsWith(matrix.os, 'windows') && 'win' || 'ubu') }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # Fail early and by name, rather than deep inside a provisioning step,
+      # when a credential has not been configured yet.
+      - name: Preflight — required secrets
+        env:
+          AKC_PRO_LICENSE_KEY: ${{ secrets.AKC_PRO_LICENSE_KEY }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          GH_PAT_E2E: ${{ secrets.GH_PAT_E2E }}
+        run: |
+          required="AKC_PRO_LICENSE_KEY"
+          case "${{ matrix.platform }}" in
+            cloudflare) required="$required CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID" ;;
+            vercel)     required="$required VERCEL_TOKEN" ;;
+            github)     required="$required GH_PAT_E2E" ;;
+          esac
+          missing=""
+          for name in $required; do
+            eval "value=\${$name}"
+            [ -n "$value" ] || missing="$missing $name"
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::Missing repository secret(s):$missing"
+            exit 1
+          fi
+          echo "All required secrets for ${{ matrix.platform }} are configured."
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build
+
+      # resolveCli() searches PATH only and deliberately never node_modules/.bin
+      # (packages/core/deploy/which.ts), so the target CLIs must be installed
+      # globally exactly as a user would install them. gh ships with the image.
+      - name: Install the official target CLIs
+        run: |
+          npm install -g wrangler@^4 vercel@latest
+          echo "wrangler: $(command -v wrangler) $(wrangler --version 2>/dev/null | head -1)"
+          echo "vercel:   $(command -v vercel) $(vercel --version 2>/dev/null | head -1)"
+          echo "gh:       $(command -v gh) $(gh --version | head -1)"
+
+      # Linux has no Secret Service on a bare runner: the vault talks to one
+      # over D-Bus, so it must be installed here and started inside the session
+      # that runs the flow (next step). libsecret-tools provides secret-tool,
+      # which the script uses to confirm the item from outside the product.
+      - name: Install a D-Bus Secret Service (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y gnome-keyring dbus dbus-x11 libsecret-tools
+
+      # Windows has no POSIX pty, so the harness drives a ConPTY through
+      # node-pty instead (tests/e2e/pty-drive.mjs). Installed with --no-save
+      # and only on this leg: it is a harness dependency, and the published
+      # package's dependency list must not grow for a test's convenience.
+      - name: Install node-pty for the ConPTY driver (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          npm install --no-save node-pty@1.1.0
+          node -e "import('node-pty').then(() => console.log('node-pty loaded'))"
+
+      # deploy is Pro-gated (exit 6). This writes exactly what
+      # `api-key-case license activate` would write after the Lemon exchange:
+      # an Ed25519-signed key that the CLI then verifies offline.
+      - name: Install the Pro license
+        env:
+          AKC_PRO_LICENSE_KEY: ${{ secrets.AKC_PRO_LICENSE_KEY }}
+        run: |
+          mkdir -p "$HOME/.api-key-case"
+          printf '%s\n' "$AKC_PRO_LICENSE_KEY" > "$HOME/.api-key-case/license.key"
+          chmod 600 "$HOME/.api-key-case/license.key"
+
+      # A fresh throwaway value per run. Registered with ::add-mask:: so that
+      # even a product bug that printed it could not publish it in the log.
+      - name: Mint the canary value
+        run: |
+          value="akce2e_$(openssl rand -hex 24)"
+          echo "::add-mask::$value"
+          echo "AKC_E2E_CANARY_VALUE=$value" >> "$GITHUB_ENV"
+
+      # macOS and Windows both need no vault bootstrap. On Windows this runs
+      # under Git Bash (see the job-level `shell: bash` default), and the
+      # script picks the ConPTY driver from `uname`.
+      - name: Run the ${{ matrix.platform }} end-to-end flow
+        if: runner.os != 'Linux'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_PAT_E2E }}
+        run: bash tests/e2e/deploy-e2e.sh "${{ matrix.platform }}"
+
+      # The whole flow runs inside one private D-Bus session, because the vault
+      # reaches the Secret Service through it. Starting the daemon in an
+      # earlier step would not work: the bus address would die with that step's
+      # shell.
+      - name: Run the ${{ matrix.platform }} end-to-end flow (Linux)
+        if: runner.os == 'Linux'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_PAT_E2E }}
+          PLATFORM: ${{ matrix.platform }}
+        run: |
+          dbus-run-session -- bash -eu -c '
+            # Start from a fresh login keyring so --unlock creates one with a
+            # password we know, instead of colliding with an existing locked
+            # keyring. The password is meaningless: it guards a throwaway
+            # keyring on an ephemeral runner and no real secret is stored here.
+            rm -f "$HOME/.local/share/keyrings/"*
+            gnome-keyring-daemon --components=secrets --daemonize --unlock <<< "api-key-case-ci"
+
+            # Prove the Secret Service actually reached the session bus BEFORE
+            # running the flow, so an infrastructure failure is never mistaken
+            # for a product failure (and never silently tolerated).
+            ready=0
+            for _ in $(seq 1 20); do
+              if dbus-send --session --print-reply --dest=org.freedesktop.DBus \
+                   /org/freedesktop/DBus org.freedesktop.DBus.ListNames \
+                   | grep -q "org.freedesktop.secrets"; then
+                ready=1
+                break
+              fi
+              sleep 0.5
+            done
+            if [ "$ready" != "1" ]; then
+              echo "::error::org.freedesktop.secrets never appeared on the session bus - the Linux Secret Service did not start."
+              exit 1
+            fi
+
+            bash tests/e2e/deploy-e2e.sh "$PLATFORM"
+          '
+
+      # The license is a plaintext entitlement, not secret material, but the
+      # runner is ephemeral anyway — remove it so nothing survives a cache step.
+      - name: Remove the local license
+        if: always()
+        run: rm -f "$HOME/.api-key-case/license.key"

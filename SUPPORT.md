@@ -1,0 +1,37 @@
+# Support
+
+API Key Case is maintained as an individual open-source project. Support is best-effort; response times and fixes are not guaranteed.
+
+## Product questions and bug reports
+
+Use [GitHub Issues](https://github.com/leone-develop/api-key-case/issues) for reproducible, non-sensitive product questions, bug reports, and feature requests. For private context, purchase questions, or a request that includes an order or account detail, email [dev@leoneapps.com](mailto:dev@leoneapps.com).
+
+Before posting:
+
+- search existing issues;
+- use the latest published version;
+- reduce the report to a minimal project using fake canary values;
+- remove usernames, local paths, account IDs, repository names, and other private context when they are not needed;
+- include the operating system, Node.js version, API Key Case version, command shape, expected result, and redacted actual result.
+
+Never post a real API key, access token, `.env` file, private key, Lemon Squeezy purchase key, `AKC1` license, order number, email address, or unredacted scan output. If a credential was exposed, rotate it at its provider before doing anything else. Deleting an Issue does not undo exposure.
+
+## Purchases and refunds
+
+Do not put transaction details in a public Issue. Use the support or refund route in the Lemon Squeezy order email or order page, or email [dev@leoneapps.com](mailto:dev@leoneapps.com) for private purchase and refund support. The product's [14-day refund policy](https://apikeycase.leoneapps.com/refund) applies.
+
+If you only need help finding that route, open an Issue without including your order number, purchase key, email address, or other buyer information.
+
+## Security vulnerabilities
+
+Do not report vulnerabilities in a public Issue. Use GitHub Private Vulnerability Reporting from the repository's Security tab, or email [dev@leoneapps.com](mailto:dev@leoneapps.com) if that route is unavailable, and follow [SECURITY.md](SECURITY.md). Use fake canary credentials in every reproduction.
+
+## What support does not cover
+
+- obtaining or recovering API keys from a provider;
+- account administration for Cloudflare, Vercel, GitHub, Lemon Squeezy, npm, or an operating system;
+- writing application-specific deployment or compliance policy;
+- emergency incident response, forensic analysis, or a guarantee that a credential was not exposed;
+- non-API-Key-Case problems in third-party CLIs, services, networks, or local machines.
+
+For a suspected credential leak, follow the rotation steps in [SECURITY.md](SECURITY.md#if-a-credential-was-exposed).

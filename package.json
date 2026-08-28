@@ -1,0 +1,73 @@
+{
+  "name": "api-key-case",
+  "version": "0.9.0",
+  "description": "Keep API keys out of AI coding sessions with local scanning, OS secret storage, and guarded CLI deployment.",
+  "type": "module",
+  "bin": {
+    "api-key-case": "dist/cli/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "README.ja.md",
+    "LICENSE",
+    "NOTICE",
+    "SECURITY.md",
+    "SUPPORT.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json && npm run build:worker",
+    "build:worker": "tsc -p workers/license-exchange/tsconfig.json",
+    "scan": "node dist/cli/index.js scan",
+    "test": "npm run build && node tests/run-tests.mjs && node workers/license-exchange/tests/run-tests.mjs && node tests/site-content.mjs",
+    "verify": "npm test",
+    "prepack": "npm run verify"
+  },
+  "keywords": [
+    "api-key",
+    "secrets",
+    "secret-management",
+    "cli",
+    "dotenv",
+    "security",
+    "mcp",
+    "ai-agent",
+    "cloudflare",
+    "vercel",
+    "github"
+  ],
+  "author": "Leone Apps",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leone-develop/api-key-case.git"
+  },
+  "homepage": "https://apikeycase.leoneapps.com/",
+  "bugs": {
+    "url": "https://github.com/leone-develop/api-key-case/issues"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260819.1",
+    "@types/node": "^24.0.0",
+    "typescript": "^5.8.0",
+    "wrangler": "^4.124.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "@napi-rs/keyring": "^1.3.0",
+    "undici-types": "^7.29.0",
+    "zod": "^4.4.3"
+  },
+  "overrides": {
+    "@hono/node-server": "^1.19.17",
+    "fast-uri": "^3.1.5",
+    "hono": "^4.13.3",
+    "ip-address": "^10.5.0"
+  }
+}

@@ -1,0 +1,151 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Portable suite: everything that does NOT need a real OS secret store.
+  #
+  # Shape: full Node range on Linux (cheapest runner), one current Node on
+  # macOS and Windows. Written with `include` only, so this is 5 jobs and not
+  # a 3 x 3 cross-product. macOS/Windows exist here to catch path, casing and
+  # shell-quoting regressions, which is what actually breaks a CLI we ship as
+  # cross-platform.
+  # ---------------------------------------------------------------------------
+  test:
+    name: test (${{ matrix.os }}, node ${{ matrix.node-version }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            node-version: 20
+          - os: ubuntu-latest
+            node-version: 22
+          - os: ubuntu-latest
+            node-version: 24
+          - os: macos-latest
+            node-version: 24
+          - os: windows-latest
+            node-version: 24
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+      - run: npm ci
+      - run: npm test
+
+  # ---------------------------------------------------------------------------
+  # Real OS secret store end-to-end, on all three platforms we advertise.
+  #
+  # Why this is a separate job: the `test` job above never touches the real
+  # keyring. Every e2e block is gated behind AGENT_KEY_CASE_E2E=1 and is
+  # otherwise skipped, so a green `test` job proves nothing about the vault.
+  #
+  # AGENT_KEY_CASE_E2E_STRICT=1 turns the harness's "backend unavailable ->
+  # skip" into a hard error (tests/run-tests.mjs, openRealVaultForE2E). Without
+  # it this job could report success against a dead keyring, which is exactly
+  # the failure mode it exists to prevent. The flag is test-harness-only: it
+  # does not change vault behaviour and adds no way to read a stored value.
+  # ---------------------------------------------------------------------------
+  keyring-e2e:
+    name: keyring e2e (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    # A keychain/credential prompt on a headless runner would hang forever
+    # rather than fail; cap it so that shows up as a timeout, not a 6h job.
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    env:
+      AGENT_KEY_CASE_E2E: "1"
+      AGENT_KEY_CASE_E2E_STRICT: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+
+      # macOS: the runner's login keychain is usable by the `runner` user as
+      # is - no `security unlock-keychain` and no dedicated temporary keychain
+      # are needed. (Upstream @napi-rs/keyring and keyring-rs both exercise the
+      # real Keychain on macos-latest with zero keychain setup.) This step is
+      # diagnostics only and must never fail the job: if Apple ever changes
+      # that, the log tells us whether the default keychain was locked before
+      # the e2e run failed.
+      - name: Keychain diagnostics (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          security default-keychain || true
+          security list-keychains || true
+          security show-keychain-info "$(security default-keychain | tr -d ' \"')" || true
+
+      # Linux is the only platform with no secret store on a bare runner: the
+      # backend talks to a D-Bus Secret Service, so one has to be installed,
+      # started AND unlocked or every keyring call fails.
+      - name: Install a D-Bus Secret Service (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y gnome-keyring dbus dbus-x11
+
+      - name: Run e2e inside a private D-Bus session (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          dbus-run-session -- bash -eu -c '
+            # Start from a fresh login keyring so --unlock creates one with a
+            # password we know, instead of colliding with an existing locked
+            # keyring. The password is meaningless: it guards a throwaway
+            # keyring on an ephemeral runner and no real secret is stored here.
+            rm -f "$HOME/.local/share/keyrings/"*
+            gnome-keyring-daemon --components=secrets --daemonize --unlock <<< "api-key-case-ci"
+
+            # Prove the Secret Service actually reached the session bus BEFORE
+            # running the suite, so an infrastructure failure is never mistaken
+            # for a product failure (and never silently tolerated).
+            ready=0
+            for _ in $(seq 1 20); do
+              if dbus-send --session --print-reply --dest=org.freedesktop.DBus \
+                   /org/freedesktop/DBus org.freedesktop.DBus.ListNames \
+                   | grep -q "org.freedesktop.secrets"; then
+                ready=1
+                break
+              fi
+              sleep 0.5
+            done
+            if [ "$ready" != "1" ]; then
+              echo "::error::org.freedesktop.secrets never appeared on the session bus - the Linux Secret Service did not start."
+              exit 1
+            fi
+
+            npm test
+          '
+
+      # Windows Credential Manager and the macOS Keychain need no bootstrap.
+      - name: Run e2e (macOS / Windows)
+        if: runner.os != 'Linux'
+        run: npm test
+
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      # `prepack` runs the full suite, so this also validates the published
+      # file list against a clean tree.
+      - run: npm pack --dry-run

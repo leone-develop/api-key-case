@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>API Key Case — demo scene</title>
+<style>
+  :root {
+    --ink: #0b1412;
+    --ink-2: #0d1714;
+    --line: #23332c;
+    --text: #eaf6ef;
+    --muted: #93a79e;
+    --mint: #bdfddb;
+    --lime: #d9ff67;
+    --aqua: #75e7c4;
+    --coral: #ff7259;
+    --amber: #ffce6a;
+    --mono: Consolas, "Cascadia Mono", "SFMono-Regular", "Liberation Mono", Menlo, monospace;
+    --sans: "Segoe UI", Inter, ui-sans-serif, -apple-system, system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; background: var(--ink); }
+  body {
+    font-family: var(--sans);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: geometricPrecision;
+  }
+  body.locale-ja {
+    font-family: "Yu Gothic UI", "Yu Gothic", "Hiragino Sans", "Noto Sans JP", var(--sans);
+  }
+
+  #stage {
+    position: relative;
+    width: 1920px;
+    height: 1080px;
+    background:
+      radial-gradient(circle at 84% 6%, rgba(117, 231, 196, 0.13), transparent 30rem),
+      radial-gradient(circle at 6% 88%, rgba(217, 255, 103, 0.09), transparent 32rem),
+      var(--ink);
+  }
+
+  /* ---------------------------------------------------------- terminal */
+  #terminal {
+    position: absolute;
+    left: 80px;
+    top: 96px;
+    width: 1312px;
+    height: 888px;
+    border: 1.5px solid var(--line);
+    border-radius: 20px;
+    background: var(--ink-2);
+    box-shadow: 0 30px 90px rgba(0, 0, 0, 0.55);
+    overflow: hidden;
+  }
+  #term-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 52px;
+    padding: 0 22px;
+    border-bottom: 1.5px solid var(--line);
+    background: #101d19;
+  }
+  .dot { width: 11px; height: 11px; border-radius: 50%; }
+  #term-title {
+    margin-left: 14px;
+    color: #7f958c;
+    font: 15px var(--mono);
+    letter-spacing: 0.02em;
+  }
+  #term-body {
+    padding: 24px 30px;
+    font: 24px/32px var(--mono);
+    white-space: pre;
+    letter-spacing: 0;
+  }
+  .l { height: 32px; }
+  .cmd-prompt { color: var(--aqua); }
+  .cmd-text { color: #ffffff; }
+  .out { color: #c9dbd3; }
+  .head { color: #ffffff; }
+  .ok { color: var(--mint); }
+  .bad { color: var(--coral); }
+  .redacted { color: var(--lime); }
+  .warn { color: var(--amber); }
+  .dim { color: #6f857c; }
+  #cursor {
+    display: inline-block;
+    width: 12px;
+    height: 24px;
+    margin-bottom: -4px;
+    background: var(--mint);
+  }
+
+  /* ------------------------------------------------------------- notes */
+  #notes {
+    position: absolute;
+    left: 1428px;
+    top: 96px;
+    width: 416px;
+    height: 888px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  #note-title {
+    margin-bottom: 22px;
+    color: var(--mint);
+    font-size: 30px;
+    font-weight: 650;
+    line-height: 1.28;
+    letter-spacing: -0.01em;
+  }
+  .note-line {
+    margin-bottom: 10px;
+    color: #b7c8c0;
+    font-size: 20px;
+    line-height: 1.5;
+  }
+  #note-flow { margin-top: 6px; }
+  .flow-item {
+    position: relative;
+    margin-bottom: 14px;
+    padding: 13px 16px;
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    background: #101d19;
+    color: var(--text);
+    font: 19px var(--mono);
+  }
+  .flow-item.accent { border-color: var(--aqua); color: var(--mint); }
+  .flow-arrow { margin: -6px 0 8px 18px; color: var(--aqua); font-size: 19px; }
+  #note-footnote {
+    margin-top: 18px;
+    color: var(--amber);
+    font-size: 19px;
+    line-height: 1.45;
+  }
+  .locale-ja #terminal { width: 1232px; }
+  .locale-ja #notes { left: 1352px; width: 492px; }
+  .locale-ja #note-title { font-size: 36px; line-height: 1.24; overflow-wrap: anywhere; }
+  .locale-ja .note-line { font-size: 24px; line-height: 1.48; overflow-wrap: anywhere; }
+  .locale-ja .flow-item { font-size: 22px; }
+  .locale-ja #note-footnote { font-size: 21px; }
+
+  /* ------------------------------------------------------------ chrome */
+  #brand {
+    position: absolute;
+    left: 80px;
+    top: 40px;
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+  }
+  #brand b { font-size: 25px; font-weight: 700; letter-spacing: -0.01em; }
+  #brand span { color: var(--muted); font-size: 19px; }
+  #footer {
+    position: absolute;
+    left: 80px;
+    top: 1012px;
+    width: 1760px;
+    display: flex;
+    justify-content: space-between;
+    color: #6f857c;
+    font-size: 18px;
+  }
+  #footer .url { color: var(--aqua); }
+
+  /* ------------------------------------------------------------- cards */
+  .card {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 150px;
+    background:
+      radial-gradient(circle at 82% 12%, rgba(117, 231, 196, 0.15), transparent 32rem),
+      radial-gradient(circle at 10% 86%, rgba(217, 255, 103, 0.1), transparent 34rem),
+      var(--ink);
+  }
+  .kicker {
+    margin-bottom: 46px;
+    color: var(--aqua);
+    font-size: 22px;
+    font-weight: 650;
+    letter-spacing: 0.34em;
+  }
+  .soft { color: #9fb3aa; font-size: 40px; font-weight: 400; line-height: 1.45; }
+  .hero {
+    margin-top: 26px;
+    font-size: 82px;
+    font-weight: 700;
+    line-height: 1.14;
+    letter-spacing: -0.025em;
+    white-space: pre-line;
+  }
+  .hero .accent { color: var(--mint); }
+  .card-footer { margin-top: 54px; color: #7d918a; font-size: 26px; }
+
+  /* outro */
+  .kicker-tight { margin-bottom: 18px; }
+  #outro-tagline { margin-bottom: 46px; color: #b7c8c0; font-size: 32px; line-height: 1.4; }
+  #outro-cols { display: flex; gap: 64px; margin-bottom: 56px; }
+  .col { flex: 1; padding: 32px 34px; border: 1.5px solid var(--line); border-radius: 20px; background: #101d19; }
+  .col.pro { border-color: var(--aqua); }
+  .col h3 { margin-bottom: 20px; font-size: 24px; font-weight: 650; color: var(--muted); letter-spacing: 0.02em; }
+  .col.pro h3 { color: var(--mint); }
+  .col ul { list-style: none; display: flex; flex-wrap: wrap; gap: 10px 12px; }
+  .col li {
+    padding: 8px 14px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    font: 20px var(--mono);
+    color: #c9dbd3;
+  }
+  .col.pro li { border-color: rgba(117, 231, 196, 0.45); color: var(--mint); }
+  #price { display: flex; align-items: baseline; gap: 26px; }
+  #price .title { font-size: 44px; font-weight: 700; letter-spacing: -0.02em; }
+  #price .amount { color: var(--lime); font-size: 56px; font-weight: 700; letter-spacing: -0.02em; }
+  #price .terms { color: var(--muted); font-size: 26px; }
+  #outro-url { margin-top: 34px; color: var(--aqua); font-size: 40px; font-weight: 600; letter-spacing: -0.01em; }
+  #outro-footer { margin-top: 26px; color: #6f857c; font-size: 22px; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="brand"><b>API Key Case</b><span id="brand-sub"></span></div>
+
+  <div id="terminal">
+    <div id="term-head">
+      <i class="dot" style="background:#ff7259"></i>
+      <i class="dot" style="background:#ffce6a"></i>
+      <i class="dot" style="background:#75e7c4"></i>
+      <span id="term-title"></span>
+    </div>
+    <div id="term-body"></div>
+  </div>
+
+  <div id="notes">
+    <div id="note-title"></div>
+    <div id="note-body"></div>
+    <div id="note-flow"></div>
+    <div id="note-footnote"></div>
+  </div>
+
+  <div id="footer">
+    <span id="footer-left"></span>
+    <span class="url">apikeycase.leoneapps.com</span>
+  </div>
+
+  <div class="card" id="intro"></div>
+  <div class="card" id="outro"></div>
+</div>
+
+<script>
+const TIMELINE = /*__TIMELINE__*/ null;
+document.documentElement.lang = TIMELINE?.meta.locale ?? "en";
+document.body.classList.toggle("locale-ja", TIMELINE?.meta.locale === "ja");
+
+const el = (id) => document.getElementById(id);
+const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+/* Deterministic easing: every visual property is a pure function of t. No CSS
+   transitions or animations are used, so a frame captured at t is identical
+   no matter how long the renderer took to get there. */
+const clamp01 = (x) => (x < 0 ? 0 : x > 1 ? 1 : x);
+const easeOut = (x) => 1 - Math.pow(1 - clamp01(x), 3);
+function fade(t, start, end, ms) {
+  if (t < start || t > end) return 0;
+  return Math.min(easeOut((t - start) / ms), easeOut((end - t) / ms));
+}
+
+/* ------------------------------------------------------------- terminal */
+function terminalState(t) {
+  const term = TIMELINE.terminal;
+  const lines = [];
+  let typing = null;
+  let hidden = null;
+  let appending = null;
+
+  for (const ev of term.events) {
+    if (ev.t > t) break;
+    if (ev.type === "clear") {
+      lines.length = 0;
+      typing = null;
+      hidden = null;
+      appending = null;
+    } else if (ev.type === "prompt") {
+      typing = ev;
+    } else if (ev.type === "submit") {
+      if (typing) lines.push({ kind: "cmd", text: typing.text });
+      typing = null;
+    } else if (ev.type === "line") {
+      lines.push({ kind: "out", text: ev.text });
+    } else if (ev.type === "hiddenInput") {
+      hidden = ev;
+    } else if (ev.type === "appendTyping") {
+      appending = ev;
+    }
+  }
+
+  if (appending) {
+    const shown = Math.min(appending.text.length, Math.floor((t - appending.t) / appending.msPerChar));
+    const last = lines[lines.length - 1];
+    if (last) lines[lines.length - 1] = { kind: last.kind, text: last.text + appending.text.slice(0, shown) };
+  }
+
+  let partial = null;
+  if (typing) {
+    const shown = Math.min(typing.text.length, Math.floor((t - typing.t) / typing.msPerChar));
+    partial = typing.text.slice(0, shown);
+  }
+
+  const hiddenActive = Boolean(hidden) && t >= hidden.t && t < hidden.t + hidden.durationMs;
+  return { lines, partial, hiddenActive };
+}
+
+/* Highlighting is presentation only: the characters come straight from the
+   recorded transcript and are never rewritten. */
+function highlight(text) {
+  let html = esc(text);
+  html = html.replace(/\*\*\*REDACTED\*\*\*/g, '<span class="redacted">***REDACTED***</span>');
+  html = html.replace(/\bWARN\b/g, '<span class="warn">WARN</span>');
+  html = html.replace(/^(\s*)OK\b/, '$1<span class="ok">OK</span>');
+  html = html.replace(/^(\s*)NG\b/, '$1<span class="bad">NG</span>');
+  return html;
+}
+
+function lineClass(text) {
+  if (text === "") return "out";
+  if (/^(OK|NG)\b/.test(text)) return "out";
+  if (/^\s/.test(text) || /^-/.test(text)) return "out";
+  return "head";
+}
+
+function renderTerminal(t) {
+  const term = TIMELINE.terminal;
+  const opacity = fade(t, term.start, term.end, term.fade);
+  el("terminal").style.opacity = opacity;
+  el("notes").style.opacity = opacity;
+  el("brand").style.opacity = opacity;
+  el("footer").style.opacity = opacity;
+  el("term-title").textContent = term.title;
+  el("brand-sub").textContent = "v" + TIMELINE.meta.cliVersion;
+  el("footer-left").textContent = TIMELINE.chrome.footer;
+  if (opacity === 0) return "term0";
+
+  const state = terminalState(t);
+  const rendered = [];
+  for (const line of state.lines) {
+    rendered.push(
+      line.kind === "cmd"
+        ? '<span class="cmd-prompt">' + esc(term.prompt) + '</span><span class="cmd-text">' + esc(line.text) + "</span>"
+        : '<span class="' + lineClass(line.text) + '">' + highlight(line.text) + "</span>"
+    );
+  }
+  if (state.partial !== null) {
+    rendered.push(
+      '<span class="cmd-prompt">' + esc(term.prompt) + '</span><span class="cmd-text">' + esc(state.partial) + "</span>"
+    );
+  }
+
+  const visible = rendered.slice(-term.rows);
+  const blinkOn = t % 1060 < 560;
+  const cursor = blinkOn ? '<i id="cursor"></i>' : '<i id="cursor" style="visibility:hidden"></i>';
+  const withCursor = visible.map((html, index) => (index === visible.length - 1 ? html + cursor : html));
+
+  el("term-body").innerHTML = withCursor.map((html) => '<div class="l">' + html + "</div>").join("");
+  return "t" + state.lines.length + ":" + (state.partial ? state.partial.length : -1) + ":" + (blinkOn ? 1 : 0) +
+    ":" + (state.hiddenActive ? 1 : 0) + ":" + opacity.toFixed(2);
+}
+
+/* ---------------------------------------------------------------- notes */
+function renderNotes(t) {
+  let active = null;
+  for (const note of TIMELINE.notes) {
+    if (t >= note.start && t <= note.end) active = note;
+  }
+  const holder = el("notes");
+  if (!active) {
+    holder.style.opacity = 0;
+    return "n0";
+  }
+  const opacity = fade(t, active.start, active.end, 280);
+  const termOpacity = fade(t, TIMELINE.terminal.start, TIMELINE.terminal.end, TIMELINE.terminal.fade);
+  holder.style.opacity = Math.min(opacity, termOpacity);
+  holder.style.transform = "translateY(" + (1 - easeOut((t - active.start) / 320)) * 14 + "px)";
+
+  el("note-title").textContent = active.title;
+  el("note-body").innerHTML = (active.body || []).map((line) => '<div class="note-line">' + esc(line) + "</div>").join("");
+  el("note-flow").innerHTML = active.flow
+    ? active.flow
+        .map((step, index) => {
+          const cls = index === 1 ? "flow-item accent" : "flow-item";
+          const arrow = index < active.flow.length - 1 ? '<div class="flow-arrow">&#8595;</div>' : "";
+          return '<div class="' + cls + '">' + esc(step) + "</div>" + arrow;
+        })
+        .join("")
+    : "";
+  el("note-footnote").textContent = active.footnote || "";
+  return "n" + TIMELINE.notes.indexOf(active) + ":" + holder.style.opacity;
+}
+
+/* ---------------------------------------------------------------- cards */
+function renderCards(t) {
+  let key = "c";
+  for (const card of TIMELINE.cards) {
+    const node = el(card.kind);
+    const opacity = fade(t, card.start, card.end, card.fade);
+    node.style.opacity = opacity;
+    node.style.pointerEvents = "none";
+    if (opacity === 0) {
+      key += "0";
+      continue;
+    }
+    node.innerHTML = card.kind === "intro" ? introHtml(card, t) : outroHtml(card, t);
+    key += card.kind + opacity.toFixed(2) + Math.floor((t - card.start) / 100);
+  }
+  return key;
+}
+
+function introHtml(card, t) {
+  const parts = ['<div class="kicker" style="opacity:' + easeOut((t - card.start) / 700).toFixed(3) + '">' + esc(card.kicker) + "</div>"];
+  for (const line of card.lines) {
+    const o = easeOut((t - card.start - line.at) / 620);
+    if (o <= 0) continue;
+    const shift = ((1 - o) * 18).toFixed(1);
+    const text = line.tone === "hero" ? heroText(line.text) : esc(line.text);
+    parts.push('<div class="' + line.tone + '" style="opacity:' + o.toFixed(3) + ";transform:translateY(" + shift + 'px)">' + text + "</div>");
+  }
+  const fo = easeOut((t - card.start - card.footer.at) / 620);
+  if (fo > 0) {
+    parts.push('<div class="card-footer" style="opacity:' + fo.toFixed(3) + '">' + esc(card.footer.text) + "</div>");
+  }
+  return parts.join("");
+}
+
+function heroText(text) {
+  return esc(text)
+    .replace("API keys", '<span class="accent">API keys</span>')
+    .replace("APIキー", '<span class="accent">APIキー</span>');
+}
+
+function outroHtml(card, t) {
+  const step = (delay, ms) => easeOut((t - card.start - delay) / ms);
+  const cols =
+    '<div id="outro-cols" style="opacity:' + step(200, 620).toFixed(3) + '">' +
+    '<div class="col"><h3>' + esc(card.free.label) + "</h3><ul>" +
+    card.free.items.map((item) => "<li>" + esc(item) + "</li>").join("") +
+    "</ul></div>" +
+    '<div class="col pro"><h3>' + esc(card.pro.label) + "</h3><ul>" +
+    card.pro.items.map((item) => "<li>" + esc(item) + "</li>").join("") +
+    "</ul></div></div>";
+  const price =
+    '<div id="price" style="opacity:' + step(900, 620).toFixed(3) + '">' +
+    '<span class="title">' + esc(card.price.title) + "</span>" +
+    '<span class="amount">' + esc(card.price.amount) + "</span>" +
+    '<span class="terms">' + esc(card.price.terms) + "</span></div>";
+  const url = '<div id="outro-url" style="opacity:' + step(1400, 620).toFixed(3) + '">' + esc(card.url) + "</div>";
+  const footer = '<div id="outro-footer" style="opacity:' + step(1800, 620).toFixed(3) + '">' + esc(card.footer) + "</div>";
+  const tagline = '<div id="outro-tagline" style="opacity:' + step(60, 620).toFixed(3) + '">' + esc(card.tagline) + "</div>";
+  return '<div class="kicker kicker-tight" style="opacity:' + step(0, 620).toFixed(3) + '">' + esc(card.kicker) + "</div>" + tagline + cols + price + url + footer;
+}
+
+/* ---------------------------------------------------------------- entry */
+window.renderFrame = function renderFrame(t) {
+  const key = renderTerminal(t) + "|" + renderNotes(t) + "|" + renderCards(t);
+  let hash = 5381;
+  for (let i = 0; i < key.length; i += 1) hash = ((hash * 33) ^ key.charCodeAt(i)) >>> 0;
+  return hash;
+};
+
+window.timelineDuration = function timelineDuration() {
+  return TIMELINE.meta.durationMs;
+};
+
+if (TIMELINE) window.renderFrame(0);
+</script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+# Copy this file to .dev.vars and replace every placeholder locally.
+# Never commit .dev.vars. Test-mode and live-mode IDs/keys are separate.
+LEMON_STORE_ID=replace-with-test-store-id
+LEMON_PRODUCT_ID=replace-with-test-product-id
+LEMON_VARIANT_ID=replace-with-test-variant-id
+LEMON_API_KEY=replace-with-test-mode-api-key
+AKC_ED25519_PRIVATE_KEY="replace-with-existing-pkcs8-ed25519-private-key"

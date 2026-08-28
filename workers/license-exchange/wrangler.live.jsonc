@@ -1,0 +1,47 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "api-key-case-license-exchange",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-07-13",
+  "compatibility_flags": ["nodejs_compat"],
+  // The exchange URL is compiled into every published CLI version, so buyers
+  // running an old release keep calling it forever. A custom domain keeps that
+  // address portable; a workers.dev address would pin this service to this
+  // Cloudflare account permanently and expose the account subdomain to every
+  // buyer. workers_dev is therefore off: the custom domain is the only route.
+  // Kept to a first-level subdomain so the zone's Universal SSL certificate
+  // covers it without an advanced certificate.
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [
+    { "pattern": "apikeycase-license.leoneapps.com", "custom_domain": true }
+  ],
+  "vars": {
+    "LEMON_TEST_MODE": "false"
+  },
+  "secrets": {
+    "required": [
+      "LEMON_STORE_ID",
+      "LEMON_PRODUCT_ID",
+      "LEMON_VARIANT_ID",
+      "LEMON_API_KEY",
+      "AKC_ED25519_PRIVATE_KEY"
+    ]
+  },
+  "ratelimits": [
+    {
+      "name": "PURCHASE_KEY_RATE_LIMITER",
+      "namespace_id": "1001",
+      "simple": { "limit": 5, "period": 60 }
+    },
+    {
+      "name": "IP_RATE_LIMITER",
+      "namespace_id": "1002",
+      "simple": { "limit": 30, "period": 60 }
+    }
+  ],
+  "observability": {
+    "enabled": true,
+    "logs": { "head_sampling_rate": 1 }
+  }
+}

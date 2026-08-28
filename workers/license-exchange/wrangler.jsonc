@@ -1,0 +1,41 @@
+{
+  // Bootstrap config for the SAME Worker as wrangler.live.jsonc (same name).
+  // It exists to break the first-deploy circularity: `wrangler secret put`
+  // refuses to target a Worker that does not exist yet, while the live config
+  // refuses to deploy until all five secrets exist. This config deploys that
+  // Worker privately (no workers.dev route, no preview URLs) and without the
+  // secrets.required guard, so `api-key-case deploy --target cloudflare
+  // --env production` can place the secrets through the product itself.
+  //
+  // This is deliberately the default-named config: a bare `wrangler deploy`
+  // in this directory hits this PRIVATE configuration, never the public one.
+  // Note that after launch a bare `wrangler deploy` therefore takes the
+  // public workers.dev route DOWN (workers_dev: false wins); redeploy with
+  // wrangler.live.jsonc to restore it.
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "api-key-case-license-exchange",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-07-13",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": false,
+  "preview_urls": false,
+  "vars": {
+    "LEMON_TEST_MODE": "false"
+  },
+  "ratelimits": [
+    {
+      "name": "PURCHASE_KEY_RATE_LIMITER",
+      "namespace_id": "1001",
+      "simple": { "limit": 5, "period": 60 }
+    },
+    {
+      "name": "IP_RATE_LIMITER",
+      "namespace_id": "1002",
+      "simple": { "limit": 30, "period": 60 }
+    }
+  ],
+  "observability": {
+    "enabled": true,
+    "logs": { "head_sampling_rate": 1 }
+  }
+}
